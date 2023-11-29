@@ -1,20 +1,20 @@
-// Materia: ProgramaciÛn I, Paralelo 1
+// Materia: Programaci√≥n I, Paralelo 1
 
 // Autor: Judith Marisol Romero Cori
 
-// Fecha creaciÛn: 20/11/2023
+// Fecha creaci√≥n: 20/11/2023
 
-// Fecha modificaciÛn: 25/11/2023
+// Fecha modificaci√≥n: 25/11/2023
 
-// N˙mero de ejericio: 1
+// N√∫mero de ejericio: 1
 
-// Problema planteado:Escribir un programa con la opciÛn de encriptar y de desencriptar un fichero de texto.
-//La encriptaciÛn consiste en que dado un fichero de texto de entrada genere otro fichero de
-//salida de extensiÛn <nombre>.COD donde el texto estar· codificado (encriptado).
-//Esta codificaciÛn consiste en reemplazar cada car·cter por el tercero siguiente seg˙n la tabla
+// Problema planteado:Escribir un programa con la opci√≥n de encriptar y de desencriptar un fichero de texto.
+//La encriptaci√≥n consiste en que dado un fichero de texto de entrada genere otro fichero de
+//salida de extensi√≥n <nombre>.COD donde el texto estar√° codificado (encriptado).
+//Esta codificaci√≥n consiste en reemplazar cada car√°cter por el tercero siguiente seg√∫n la tabla
 //ASCII.
-//La opciÛn de desencriptado consiste en leer un fichero <nombre>.COD y recuperar la
-//informaciÛn original.
+//La opci√≥n de desencriptado consiste en leer un fichero <nombre>.COD y recuperar la
+//informaci√≥n original.
 
 #include <iostream>
 #include <fstream>
@@ -22,64 +22,85 @@
 
 using namespace std;
 
-void encriptarArchivo(const string &nombreEntrada, const string &nombreSalida);
-void desencriptarArchivo(const string &nombreEntrada, const string &nombreSalida);
+// Funci√≥n para encriptar un caracter seg√∫n la tabla ASCII
+char encriptarCaracter(char c) {
+    return c + 3;  // Reemplazar por el tercer siguiente en la tabla ASCII
+}
+
+// Funci√≥n para desencriptar un caracter
+char desencriptarCaracter(char c) {
+    return c - 3;  // Recuperar el caracter original
+}
+
+// Funci√≥n para encriptar un archivo de texto
+void encriptarArchivo(const string& nombreEntrada, const string& nombreSalida) {
+    ifstream archivoEntrada(nombreEntrada);
+    ofstream archivoSalida(nombreSalida + ".COD");
+
+    if (!archivoEntrada.is_open() || !archivoSalida.is_open()) {
+        cout << "Error al abrir los archivos." << endl;
+        return;
+    }
+
+    char caracter;
+    while (archivoEntrada.get(caracter)) {
+        archivoSalida.put(encriptarCaracter(caracter));
+    }
+
+    archivoEntrada.close();
+    archivoSalida.close();
+
+    cout << "Encriptaci√≥n completada." << endl;
+}
+
+// Funci√≥n para desencriptar un archivo de texto
+void desencriptarArchivo(const string& nombreEntrada, const string& nombreSalida) {
+    ifstream archivoEntrada(nombreEntrada + ".COD");
+    ofstream archivoSalida(nombreSalida);
+
+    if (!archivoEntrada.is_open() || !archivoSalida.is_open()) {
+        cout << "Error al abrir los archivos." << endl;
+        return;
+    }
+
+    char caracter;
+    while (archivoEntrada.get(caracter)) {
+        archivoSalida.put(desencriptarCaracter(caracter));
+    }
+
+    archivoEntrada.close();
+    archivoSalida.close();
+
+    cout << "Desencriptaci√≥n completada." << endl;
+}
 
 int main() {
-    string nombreArchivo;
-    cout << "Ingrese el nombre del archivo: ";
-    getline(cin, nombreArchivo);
+    int opcion;
+    string nombreEntrada, nombreSalida;
 
-    // Encriptar el archivo
-    encriptarArchivo(nombreArchivo, nombreArchivo + ".COD");
+    cout << "Ingrese el nombre del archivo de entrada: ";
+    getline(cin, nombreEntrada);
 
-    // Desencriptar el archivo
-    desencriptarArchivo(nombreArchivo + ".COD", nombreArchivo + "_desencriptado.txt");
+    cout << "Ingrese el nombre del archivo de salida: ";
+    getline(cin, nombreSalida);
+
+    cout << "Seleccione una opci√≥n:\n";
+    cout << "1. Encriptar\n";
+    cout << "2. Desencriptar\n";
+    cin >> opcion;
+
+    switch (opcion) {
+        case 1:
+            encriptarArchivo(nombreEntrada, nombreSalida);
+            break;
+        case 2:
+            desencriptarArchivo(nombreEntrada, nombreSalida);
+            break;
+        default:
+            cout << "Opci√≥n no v√°lida." << endl;
+            break;
+    }
 
     return 0;
-}
-
-void encriptarArchivo(const string &nombreEntrada, const string &nombreSalida) {
-    ifstream archivoEntrada(nombreEntrada);
-    ofstream archivoSalida(nombreSalida);
-
-    if (!archivoEntrada.is_open() || !archivoSalida.is_open()) {
-        cout << "Error al abrir los archivos." << endl;
-        return;
-    }
-
-    char caracter;
-    while (archivoEntrada.get(caracter)) {
-        // Encriptar: reemplazar cada car·cter por el tercero siguiente en la tabla ASCII
-        caracter = caracter + 3;
-        archivoSalida.put(caracter);
-    }
-
-    archivoEntrada.close();
-    archivoSalida.close();
-
-    cout << "EncriptaciÛn completada. Archivo encriptado: " << nombreSalida << endl;
-}
-
-void desencriptarArchivo(const string &nombreEntrada, const string &nombreSalida) {
-    ifstream archivoEntrada(nombreEntrada);
-    ofstream archivoSalida(nombreSalida);
-
-    if (!archivoEntrada.is_open() || !archivoSalida.is_open()) {
-        cout << "Error al abrir los archivos." << endl;
-        return;
-    }
-
-    char caracter;
-    while (archivoEntrada.get(caracter)) {
-        // Desencriptar: reemplazar cada car·cter por el tercero anterior en la tabla ASCII
-        caracter = caracter - 3;
-        archivoSalida.put(caracter);
-    }
-
-    archivoEntrada.close();
-    archivoSalida.close();
-
-    cout << "DesencriptaciÛn completada. Archivo desencriptado: " << nombreSalida << endl;
 }
 
