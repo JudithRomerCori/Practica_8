@@ -1,126 +1,115 @@
-// Materia: Programaci髇 I, Paralelo 1
+// Materia: Programaci贸n I, Paralelo 1
 
 // Autor: Judith Marisol Romero Cori
 
-// Fecha creaci髇: 22/11/2023
+// Fecha creaci贸n: 22/11/2023
 
-// Fecha modificaci髇: 26/11/2023
+// Fecha modificaci贸n: 26/11/2023
 
-// N鷐ero de ejericio: 9
+// N煤mero de ejericio: 9
 
 // Problema planteado:Dado una tabla grabada en un fichero en formato binario <nombre>.BIN hallar la suma
-//horizontal y vertical y grabar la tabla y los resultados en otro fichero de texto o binario seg鷑 se
+//horizontal y vertical y grabar la tabla y los resultados en otro fichero de texto o binario seg煤n se
 //introduzca por pantalla.
-//El resultado en texto ser韆 el siguiente:
+//El resultado en texto ser铆a el siguiente:
 //Ej:
 //1.23 3.45 12.5 17,18
 //4.8 3.9 0.83 9,53
 //6,03 7,35 13,33 26,71
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
 
-// Funci髇 para leer la tabla desde un archivo binario
-void leerTablaBinaria(const string& nombreArchivo, vector<vector<double>>& tabla) {
+void leerArchivoBinario(const string& nombreArchivo, vector<vector<double>>& tabla) {
     ifstream archivoEntrada(nombreArchivo, ios::binary);
 
     if (!archivoEntrada.is_open()) {
-        cout << "No se pudo abrir el archivo de entrada." << endl;
+        cout << "Error al abrir el archivo binario." << endl;
         return;
     }
 
-    // Leer las dimensiones de la tabla
-    size_t filas, columnas;
-    archivoEntrada.read(reinterpret_cast<char*>(&filas), sizeof(size_t));
-    archivoEntrada.read(reinterpret_cast<char*>(&columnas), sizeof(size_t));
+    double numero;
+    vector<double> fila;
 
-    // Redimensionar la tabla
-    tabla.resize(filas, vector<double>(columnas));
-
-    // Leer los elementos de la tabla
-    for (size_t i = 0; i < filas; ++i) {
-        for (size_t j = 0; j < columnas; ++j) {
-            archivoEntrada.read(reinterpret_cast<char*>(&tabla[i][j]), sizeof(double));
-        }
+    while (archivoEntrada.read(reinterpret_cast<char*>(&numero), sizeof(double))) {
+        fila.push_back(numero);
     }
 
     archivoEntrada.close();
-}
 
-// Funci髇 para calcular la suma horizontal y vertical
-void calcularSumas(const vector<vector<double>>& tabla, vector<double>& sumasHorizontales, vector<double>& sumasVerticales) {
-    size_t filas = tabla.size();
-    size_t columnas = tabla[0].size();
+    // Asumimos que la tabla es cuadrada para simplificar el c贸digo
+    size_t n = static_cast<size_t>(sqrt(fila.size()));
 
-    // Inicializar vectores de sumas con ceros
-    sumasHorizontales.resize(filas, 0.0);
-    sumasVerticales.resize(columnas, 0.0);
+    tabla.resize(n, vector<double>(n));
 
-    // Calcular sumas horizontales
-    for (size_t i = 0; i < filas; ++i) {
-        for (size_t j = 0; j < columnas; ++j) {
-            sumasHorizontales[i] += tabla[i][j];
-        }
-    }
+    size_t contador = 0;
 
-    // Calcular sumas verticales
-    for (size_t j = 0; j < columnas; ++j) {
-        for (size_t i = 0; i < filas; ++i) {
-            sumasVerticales[j] += tabla[i][j];
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            tabla[i][j] = fila[contador++];
         }
     }
 }
 
-// Funci髇 para escribir la tabla y las sumas en un archivo (texto o binario)
-void escribirResultado(const string& nombreArchivo, const vector<vector<double>>& tabla,
-                       const vector<double>& sumasHorizontales, const vector<double>& sumasVerticales) {
+void escribirArchivoTexto(const string& nombreArchivo, const vector<vector<double>>& tabla, const vector<double>& sumaHorizontal, const vector<double>& sumaVertical) {
     ofstream archivoSalida(nombreArchivo);
 
     if (!archivoSalida.is_open()) {
-        cout << "No se pudo abrir el archivo de salida." << endl;
+        cout << "Error al abrir el archivo de texto." << endl;
         return;
     }
 
-    // Escribir la tabla original en el archivo
-    for (size_t i = 0; i < tabla.size(); ++i) {
-        for (size_t j = 0; j < tabla[i].size(); ++j) {
+    size_t n = tabla.size();
+
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
             archivoSalida << fixed << setprecision(2) << tabla[i][j] << " ";
         }
-        archivoSalida << fixed << setprecision(2) << sumasHorizontales[i] << endl;
+        archivoSalida << fixed << setprecision(2) << sumaHorizontal[i] << endl;
     }
 
-    // Escribir las sumas verticales en la 鷏tima fila
-    for (size_t j = 0; j < sumasVerticales.size(); ++j) {
-        archivoSalida << fixed << setprecision(2) << sumasVerticales[j] << " ";
+    for (size_t i = 0; i < n; ++i) {
+        archivoSalida << fixed << setprecision(2) << sumaVertical[i] << " ";
     }
-    archivoSalida << endl;
 
     archivoSalida.close();
+
+    cout << "Proceso completado. Se ha creado el archivo de texto '" << nombreArchivo << "'." << endl;
 }
 
 int main() {
     string nombreArchivoEntrada, nombreArchivoSalida;
     vector<vector<double>> tabla;
-    vector<double> sumasHorizontales, sumasVerticales;
+    vector<double> sumaHorizontal, sumaVertical;
 
-    // Solicitar al usuario el nombre del archivo de entrada
-    cout << "Ingrese el nombre del archivo de entrada: ";
+    cout << "Ingrese el nombre del archivo binario de entrada: ";
     getline(cin, nombreArchivoEntrada);
 
-    // Leer la tabla desde el archivo binario
-    leerTablaBinaria(nombreArchivoEntrada, tabla);
+    leerArchivoBinario(nombreArchivoEntrada, tabla);
 
-    // Calcular sumas horizontales y verticales
-    calcularSumas(tabla, sumasHorizontales, sumasVerticales);
+    // Calcular suma horizontal
+    for (const auto& fila : tabla) {
+        sumaHorizontal.push_back(accumulate(fila.begin(), fila.end(), 0.0));
+    }
 
-    // Solicitar al usuario el nombre del archivo de salida
-    cout << "Ingrese el nombre del archivo de salida: ";
+    // Calcular suma vertical
+    size_t n = tabla.size();
+    sumaVertical.resize(n);
+
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            sumaVertical[j] += tabla[i][j];
+        }
+    }
+
+    cout << "Ingrese el nombre del archivo de salida (con extensi贸n .txt): ";
     getline(cin, nombreArchivoSalida);
 
-    // Escribir la tabla y las sumas en el archivo de salida
-    escribirResultado(nombreArchivoSalida, tabla, sumasHorizontales, sumasVerticales);
+    escribirArchivoTexto(nombreArchivoSalida, tabla, sumaHorizontal, sumaVertical);
 
-    cout << "Proceso finalizado. Se ha creado el archivo '" << nombreArchivoSalida << "'." << endl
+    return 0;
+}
+
