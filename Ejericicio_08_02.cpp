@@ -1,22 +1,22 @@
-// Materia: Programación I, Paralelo 1
+// Materia: ProgramaciÃ³n I, Paralelo 1
 
 // Autor: Judith Marisol Romero Cori
 
-// Fecha creación: 20/11/2023
+// Fecha creaciÃ³n: 20/11/2023
 
-// Fecha modificación: 25/11/2023
+// Fecha modificaciÃ³n: 25/11/2023
 
-// Número de ejericio: 2
+// NÃºmero de ejericio: 2
 
 // Problema planteado:Escriba un programa que cree un fichero de texto llamado "PERSONAS.BIN" en el que se
-//guarde la información de un número indeterminado de personas.
-//La información que se guardará por cada persona será:
-//• Nombre: De 1 a 30 caracteres.
-//• Edad numérico (>= 1 y <=100)
-//• Sexo CHAR (M/F).
-//• FechaNacimiento CHAR(10) (formato dd/mm/yyyy)
-//La información correspondiente a cada persona se leerá del teclado.
-//El proceso finalizará cuando se teclee un campo "Nombre" que esté solamente con el carácter
+//guarde la informaciÃ³n de un nÃºmero indeterminado de personas.
+//La informaciÃ³n que se guardarÃ¡ por cada persona serÃ¡:
+//â€¢ Nombre: De 1 a 30 caracteres.
+//â€¢ Edad numÃ©rico (>= 1 y <=100)
+//â€¢ Sexo CHAR (M/F).
+//â€¢ FechaNacimiento CHAR(10) (formato dd/mm/yyyy)
+//La informaciÃ³n correspondiente a cada persona se leerÃ¡ del teclado.
+//El proceso finalizarÃ¡ cuando se teclee un campo "Nombre" que estÃ© solamente con el carÃ¡cter
 //de espacio.
 #include <iostream>
 #include <fstream>
@@ -38,41 +38,48 @@ void escribirArchivoBinario(const Persona& persona)
 {
     ofstream archivoEscritura;
     archivoEscritura.open(NOMBRE_ARCHIVO, ios::app | ios::binary);
+
+    if (!archivoEscritura.is_open())
+    {
+        cout << "No se pudo abrir el archivo para escritura." << endl;
+        return;
+    }
+
     archivoEscritura.write(reinterpret_cast<const char*>(&persona), sizeof(Persona));
+
     archivoEscritura.close();
 }
 
 int main()
 {
-    Persona persona;
-
     while (true)
     {
-        // Ingresar información de la persona
-        cout << "Ingrese el nombre (o espacio para finalizar): ";
-        cin.getline(persona.nombre, 31);
+        Persona nuevaPersona;
 
-        // Verificar si se debe finalizar el programa
-        if (strlen(persona.nombre) == 0 || persona.nombre[0] == ' ')
+        // Ingresar informaciÃ³n de la persona
+        cout << "Ingrese el nombre de la persona (Espacio para finalizar): ";
+        cin.ignore();  // Limpiar el buffer antes de leer la lÃ­nea
+        cin.getline(nuevaPersona.nombre, 30);
+
+        if (strlen(nuevaPersona.nombre) == 0)
             break;
 
-        cout << "Ingrese la edad: ";
-        cin >> persona.edad;
+        cout << "Ingrese la edad de la persona: ";
+        cin >> nuevaPersona.edad;
 
-        cout << "Ingrese el sexo (M/F): ";
-        cin >> persona.sexo;
+        cout << "Ingrese el sexo de la persona (M/F): ";
+        cin >> nuevaPersona.sexo;
 
         cout << "Ingrese la fecha de nacimiento (dd/mm/yyyy): ";
-        cin >> persona.fechaNacimiento;
+        cin.ignore();  // Limpiar el buffer antes de leer la lÃ­nea
+        cin.getline(nuevaPersona.fechaNacimiento, 10);
 
-        // Limpiar el buffer después de leer el sexo
-        cin.ignore();
-
-        // Escribir la información en el archivo binario
-        escribirArchivoBinario(persona);
+        // Escribir la nueva persona en el archivo
+        escribirArchivoBinario(nuevaPersona);
     }
 
     cout << "Proceso finalizado. Se ha creado el archivo 'PERSONAS.BIN'." << endl;
 
     return 0;
 }
+
